@@ -1,0 +1,8 @@
+{
+  "name": "2048botserver",
+  "version": "0.0.0",
+  "private": true,
+  "dependencies": {
+    "express": "^4.16.4"
+  }
+}
