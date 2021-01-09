@@ -29,10 +29,11 @@ app.get('/game/:id/move', (req, res) => {
   let game = games.get(id);
 
   if (!game.finished) {
-    game.finished = Math.random() > 0.95;
+    // game.finished = Math.random() > 0.95;
     let {newState, newScore} = move(direction, game.state)
-    game.state = newState;
+    game.state = addTile(newState);
     game.score = game.score + newScore;
+    game.finished = checkFinished(game.state)
     games.udpate(id, game)
   }
   console.log(id, direction, game.score, game.finished);
@@ -50,7 +51,7 @@ app.get('/game/:id', (req, res) => {
 
 app.use('/overview', express.static('public'))
 
-app.ws('/overview/games', (ws, req) => {
+app.ws('/api/overview', (ws, req) => {
   let sendAll = () => ws.send(JSON.stringify(games.getall()))
   
   sendAll()
@@ -95,94 +96,72 @@ function createGame (name) {
   return game;
 }
 
-function occupiedFields (state) {
-  return state.map((e, i) => e != 0 ? i : -1).filter(e => e !== -1);
-}
 
-// TODO: implement rotation and then use the same code for all cases with different rotations
 function move (direction, state) {
-  let newScore = 0
-  let newState = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
-
   switch (direction) {
     case 'left':
-      for (let i = 0; i < 4; i += 1) {
-        let row = state.filter((_, j) => i * 4 <= j && j <= (i+1) * 4)
-        row = row.filter(e => e != 0)
-        for (let z = 0; z < row.length -1 ; z += 1) {
-          if (row[z] == row[z + 1]) {
-            row[z] = row[z] * 2;
-            newScore += row[z]; 
-            row[z + 1] = 0;
-          }
-        }
-        row = row.filter(e => e != 0)
-        for (let j = 0; j < row.length; j += 1) {
-          newState[i + j] = row[j]
-        }
-      }
-      return {newState, newScore}
+      return moveLeft(state)
     case 'right':
-      for (let i = 0; i < 4; i += 1) {
-        let row = state.filter((_, j) => i * 4 <= j && j <= (i+1) * 4)
-        row = row.filter(e => e != 0)
-        for (let z = row.length-1; z > 0 ; z -= 1) {
-          if (row[z] == row[z - 1]) {
-            row[z] = row[z] * 2;
-            newScore += row[z]; 
-            row[z - 1] = 0;
-          }
-        }
-        row = row.filter(e => e != 0)
-        for (let j = 0; j < row.length; j += 1) {
-          newState[i + 3 - j] = row.reverse()[j]
-        }
-      }
+      state = rotate16Board(state)
+      state = rotate16Board(state)
+      var {newState, newScore} = moveLeft(state)
+      newState = rotate16Board(newState)
+      newState = rotate16Board(newState)
       return {newState, newScore}
     case 'up':
-      for (let i = 0; i < 4; i += 1) {
-        let col = state.filter((_, j) => j % 4 == i)
-        col = col.filter(e => e != 0)
-        for (let z = 0; z < col.length -1 ; z += 1) {
-          if (col[z] == col[z + 1]) {
-            col[z] = col[z] * 2;
-            newScore += col[z]; 
-            col[z + 1] = 0;
-          }
-        }
-        col = col.filter(e => e != 0)
-        for (let j = 0; j < col.length; j += 1) {
-          newState[i + j * 4] = col[j]
-        }
-      }
+      state = rotate16Board(state)
+      state = rotate16Board(state)
+      state = rotate16Board(state)
+      var {newState, newScore} = moveLeft(state)
+      newState = rotate16Board(newState)
       return {newState, newScore}
     case 'down':
-      for (let i = 0; i < 4; i += 1) {
-        let col = state.filter((_, j) => j % 4 == i)
-        col = col.filter(e => e != 0)
-        for (let z = col.length -1; z > 0; z -= 1) {
-          if (col[z] == col[z - 1]) {
-            col[z] = col[z] * 2;
-            newScore += col[z]; 
-            col[z - 1] = 0;
-          }
-        }
-        col = col.filter(e => e != 0)
-        for (let j = 0; j < col.length; j += 1) {
-          newState[i + (12 - 4 * j)] = col.reverse()[j]
-        }
-      }
+      state = rotate16Board(state)
+      var {newState, newScore} = moveLeft(state)
+      newState = rotate16Board(newState)
+      newState = rotate16Board(newState)
+      newState = rotate16Board(newState)
       return {newState, newScore}
     default: 
       console.log('Unknown direction', direction);
-    return [state, 0]
+    return {newState: state, newScore:0}
   }
 }
 
-function rotateBoard(board, size) {
-  let newBoard = []
-  for (let i = 0; i < board.length; i += 1) {
+function moveLeft(state) {
+  let newScore = 0
+  let newState = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
 
+  for (let i = 0; i < 4; i += 1) {
+    let row = state.filter((_, j) => i * 4 <= j && j < (i+1) * 4)
+    row = row.filter(e => e != 0)
+    for (let z = 0; z < row.length -1 ; z += 1) {
+      if (row[z] == row[z + 1]) {
+        row[z] = row[z] * 2;
+        newScore += row[z]; 
+        row[z + 1] = 0;
+      }
+    }
+    row = row.filter(e => e != 0)
+    for (let j = 0; j < row.length; j += 1) {
+      newState[i * 4 + j] = row[j]
+    }
   }
-  return newBoard
+  return {newState, newScore}
+}
+
+function rotate16Board(board) {
+  if (board.length != 16) {
+    throw new Error('Wrong boardsize')
+  }
+  let indx = [12, 8, 4, 0, 13, 9, 5, 1, 14, 10, 6, 2, 15, 11, 7, 3]
+  return indx.map(e => board[e]);
+}
+
+function checkFlatTwoNeighborsEqual (state) {
+  return state.reduce((prv, cur, curIdx) => prv || ((curIdx % 4) - ((curIdx + 1) % 4) === 1 && (curIdx < 15 && cur === state[curIdx + 1])), false);
+}
+
+function checkFinished (state) {
+  return checkFlatTwoNeighborsEqual(state) || checkFlatTwoNeighborsEqual(rotate16Board(state));
 }

@@ -8,10 +8,14 @@
 <body>
     <div id="app">
         <div v-for="game in games" class="game">
-            <h3>{{game.name}}</h3>
+            <h3 class="title">
+                <span>{{game.name}}</span>
+                <span>{{game.score}}</span>
+            </h3>
+
             <div class="field">
-                <div v-for="tile in game.state" class="tile">
-                    {{tile}}
+                <div v-for="tile in game.state" class="tile" :class="[tileToClass(tile)]">
+                    <span class="center" v-if="tile > 0">{{tile}}</span>
                 </div>
             </div>
         </div>
@@ -28,9 +32,14 @@
                 socket: null
             }
         },
+        methods: {
+            tileToClass (tile) {
+                return 'n' + tile;
+            }
+        },
         created: function() {
             const socketProtocol = (window.location.protocol === 'https:' ? 'wss:' : 'ws:')
-            const echoSocketUrl = socketProtocol + '//' + window.location.hostname + ':3000/overview/games/'
+            const echoSocketUrl = socketProtocol + '//' + window.location.hostname + ':3000/api/overview/'
             this.socket = new WebSocket(echoSocketUrl);
 
             this.socket.onmessage = e => {
@@ -43,19 +52,156 @@
     })    
 </script>
 <style>
+    .center {
+        position: absolute;
+        left: 50%;
+        top: 50%;
+        transform: translate(-50%, -50%);
+    }
+
     .game {
         float: left;
+        margin: 20px;
+    }
+
+    .title {
+        padding: 0 8px;
+        display: flex;
+        justify-content: space-between;
     }
 
     .field {
-        width: 240px;
-        height: 240px;
+        width: 200px;
+        height: 200px;
+        background-color: #bbada0;
     }
 
     .tile {
-        width: 50px;
-        height: 50px;
+        width: 40px;
+        height: 40px;
+        margin: 5px;
         float: left;
+        position: relative;
+        /* background-color:  */
     }
+
+    .tile.n0 {
+        background-color: rgba(238, 228, 218, 0.35);
+    }
+
+    .tile.n2 {
+        background-color: #eee4da;
+    }
+
+    .tile.n4 {
+        background-color: #ede0c8;
+    }
+
+    .tile.n8 {
+        background-color: #f2b179;
+    }
+
+    .tile.n16 {
+        background-color: #f59563;
+    }
+
+    .tile.n32 {
+        background-color: #f67c5f;
+    }
+
+    .tile.n64 {
+        background-color: #f65e3b;
+    }
+
+    .tile.n128 {
+        background-color: #edcf72;
+    }
+
+    .tile.n256 {
+        background-color: #edcc61;
+    }
+
+    .tile.n512 {
+        background-color: #edc850;
+    }
+
+    .tile.n1024 {
+        background-color: #edc53f;
+    }
+
+    .tile.n2048 {
+        background-color: #edc22e;
+    }
+
+    /* .tile.tile-2 .tile-inner {
+ background:#eee4da;
+ box-shadow:0 0 30px 10px transparent,inset 0 0 0 1px transparent
+}
+.tile.tile-4 .tile-inner {
+ background:#ede0c8;
+ box-shadow:0 0 30px 10px transparent,inset 0 0 0 1px transparent
+}
+.tile.tile-8 .tile-inner {
+ color:#f9f6f2;
+ background:#f2b179;
+}
+.tile.tile-16 .tile-inner {
+ color:#f9f6f2;
+ background:#f59563;
+}
+.tile.tile-32 .tile-inner {
+ color:#f9f6f2;
+ background:#f67c5f;
+}
+.tile.tile-64 .tile-inner {
+ color:#f9f6f2;
+ background:#f65e3b;
+}
+.tile.tile-128 .tile-inner {
+ color:#f9f6f2;
+ background:#edcf72;
+ box-shadow:0 0 30px 10px rgba(243,215,116,.2381),inset 0 0 0 1px rgba(255,255,255,.14286);
+}
+.tile.tile-128 .tile-inner {
+ }
+}
+.tile.tile-256 .tile-inner {
+ color:#f9f6f2;
+ background:#edcc61;
+ box-shadow:0 0 30px 10px rgba(243,215,116,.31746),inset 0 0 0 1px rgba(255,255,255,.19048);
+}
+.tile.tile-256 .tile-inner {
+ }
+}
+.tile.tile-512 .tile-inner {
+ color:#f9f6f2;
+ background:#edc850;
+ box-shadow:0 0 30px 10px rgba(243,215,116,.39683),inset 0 0 0 1px rgba(255,255,255,.2381);
+}
+.tile.tile-512 .tile-inner {
+ }
+}
+.tile.tile-1024 .tile-inner {
+ color:#f9f6f2;
+ background:#edc53f;
+ box-shadow:0 0 30px 10px rgba(243,215,116,.47619),inset 0 0 0 1px rgba(255,255,255,.28571);
+}
+.tile.tile-1024 .tile-inner {
+ }
+}
+.tile.tile-2048 .tile-inner {
+ color:#f9f6f2;
+ background:#edc22e;
+ box-shadow:0 0 30px 10px rgba(243,215,116,.55556),inset 0 0 0 1px rgba(255,255,255,.33333);
+}
+.tile.tile-2048 .tile-inner {
+ }
+}
+.tile.tile-super .tile-inner {
+ color:#f9f6f2;
+ background:#3c3a32;
+} */
+
+
 </style>
 </html>
