@@ -6,6 +6,56 @@
     <title>2048 Overview</title>
 </head>
 <body>
-    Hello World
+    <div id="app">
+        <div v-for="game in games" class="game">
+            <h3>{{game.name}}</h3>
+            <div class="field">
+                <div v-for="tile in game.state" class="tile">
+                    {{tile}}
+                </div>
+            </div>
+        </div>
+    </div>
 </body>
+<script src="https://cdn.jsdelivr.net/npm/vue@2/dist/vue.js"></script>
+<script>
+    var data = {games: []}
+    var app = new Vue({
+        el: '#app',
+        data: function () {
+            return {
+                games: [],
+                socket: null
+            }
+        },
+        created: function() {
+            const socketProtocol = (window.location.protocol === 'https:' ? 'wss:' : 'ws:')
+            const echoSocketUrl = socketProtocol + '//' + window.location.hostname + ':3000/overview/games/'
+            this.socket = new WebSocket(echoSocketUrl);
+
+            this.socket.onmessage = e => {
+                this.games = JSON.parse(e.data);
+                console.log('current state:', this.games)
+            }
+
+            // TODO: onclose => show message to reload / reconnect
+        }
+    })    
+</script>
+<style>
+    .game {
+        float: left;
+    }
+
+    .field {
+        width: 240px;
+        height: 240px;
+    }
+
+    .tile {
+        width: 50px;
+        height: 50px;
+        float: left;
+    }
+</style>
 </html>

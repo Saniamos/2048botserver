@@ -2,49 +2,70 @@ const express = require('express')
 const app = express()
 const port = 3000
 
-const games = [];
-
-
-app.get('game/start', (req, res) => {
-  let id = games.push(createGame(req.query.name)) - 1;
-  games[id].id = id
-  res.send(JSON.stringify(games[id]))
-})
-
-app.get('game/:id/move', (req, res) => {
-  let direction = req.query.direction;
-  if (req.params.id > games.length) {
-    console.log('tried to acces old game')
-  } else {
-    let game = games[req.params.id];
-
-    if (!game.finished) {
-      game.finished = Math.random() > 0.9;
-      let {newState, newScore} = move(direction, game.state)
-      game.state = newState;
-      game.score = game.score + newScore;
-    }
-    console.log(game.id, direction, game.score, game.finished);
-    res.send(JSON.stringify(game))
-  }
-})
-
-app.get('/game/:id', (req, res) => {
-  if (req.params.id > games.length) {
-    console.log('tried to acces old game')
-  } else {
-    let game = games[req.params.id];
-    res.send(JSON.stringify(game))
-  }
-})
-
-// todo: subscribe? 
-app.use('/overview', express.static('public'))
-
+const expressWs = require('express-ws')(app);
 app.listen(port, () => {
   console.log(`Example app listening at http://localhost:${port}`)
 })
 
+const ObeservableStorage = require('./state');
+// TODO: make sure to save this somewhere as well
+const games = new ObeservableStorage();
+
+// === Game API =====================
+
+games.on('add', ({id, item}) => console.log('add', id));
+games.on('change', ({id, item}) => console.log('change', id));
+
+
+app.get('/game/start', (req, res) => {
+  let game = createGame(req.query.name)
+  let id = games.add(game);
+  res.send(JSON.stringify({id, ...game}))
+})
+
+app.get('/game/:id/move', (req, res) => {
+  let direction = req.query.direction;
+  let id = req.params.id;
+  let game = games.get(id);
+
+  if (!game.finished) {
+    game.finished = Math.random() > 0.95;
+    let {newState, newScore} = move(direction, game.state)
+    game.state = newState;
+    game.score = game.score + newScore;
+    games.udpate(id, game)
+  }
+  console.log(id, direction, game.score, game.finished);
+  res.send(JSON.stringify({id, ...game}))
+})
+
+app.get('/game/:id', (req, res) => {
+  let id = req.params.id;
+  let game = games.get(id);
+  res.send(JSON.stringify({id, ...game}))
+})
+
+
+// === Overview API =====================
+
+app.use('/overview', express.static('public'))
+
+app.ws('/overview/games', (ws, req) => {
+  let sendAll = () => ws.send(JSON.stringify(games.getall()))
+  
+  sendAll()
+
+  games.on('add', sendAll)
+  games.on('change', sendAll)
+
+  ws.on('close', () => {
+    games.removeListener('add', sendAll);
+    games.removeListener('change', sendAll);
+  })
+});
+
+
+// === Game Rules =====================
 
 function emptyTiles (state) {
   return state.map((e, i) => e == 0 ? i : -1).filter(e => e !== -1);
@@ -78,6 +99,7 @@ function occupiedFields (state) {
   return state.map((e, i) => e != 0 ? i : -1).filter(e => e !== -1);
 }
 
+// TODO: implement rotation and then use the same code for all cases with different rotations
 function move (direction, state) {
   let newScore = 0
   let newState = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
@@ -104,7 +126,7 @@ function move (direction, state) {
       for (let i = 0; i < 4; i += 1) {
         let row = state.filter((_, j) => i * 4 <= j && j <= (i+1) * 4)
         row = row.filter(e => e != 0)
-        for (let z = row.length - 1; z > 0 ; z -= 1) {
+        for (let z = row.length-1; z > 0 ; z -= 1) {
           if (row[z] == row[z - 1]) {
             row[z] = row[z] * 2;
             newScore += row[z]; 
