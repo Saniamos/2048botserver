@@ -35,7 +35,7 @@ function getRandomInt(max) {
 }
 
 async function play() {
-  var {id, game} = await start('Bot xyz')
+  var {id, game} = await start('Bot: Random')
   while (game.finished === false) {
     let direction = directions[getRandomInt(3)];
     game = await move(id, direction)

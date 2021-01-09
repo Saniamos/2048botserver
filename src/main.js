@@ -129,6 +129,7 @@ function move (direction, state) {
 }
 
 function moveLeft(state) {
+  // TODO: there must be a more elegant version of this...
   let newScore = 0
   let newState = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
 
@@ -158,10 +159,14 @@ function rotate16Board(board) {
   return indx.map(e => board[e]);
 }
 
-function checkFlatTwoNeighborsEqual (state) {
-  return state.reduce((prv, cur, curIdx) => prv || ((curIdx % 4) - ((curIdx + 1) % 4) === 1 && (curIdx < 15 && cur === state[curIdx + 1])), false);
+function hasTwoEqualNeighbors (state) {
+  return (state
+    .map((e, i) => e === state[i + 1])
+    .filter((e, i) => i % 4 !== 3 && e).length > 0)
 }
 
 function checkFinished (state) {
-  return checkFlatTwoNeighborsEqual(state) || checkFlatTwoNeighborsEqual(rotate16Board(state));
+  return !(state.filter(e => e === 0).length > 0
+    || hasTwoEqualNeighbors(state) 
+    || hasTwoEqualNeighbors(rotate16Board(state)));
 }
