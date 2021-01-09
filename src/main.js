@@ -5,13 +5,13 @@ const port = 3000
 const games = [];
 
 
-app.get('/start', (req, res) => {
+app.get('game/start', (req, res) => {
   let id = games.push(createGame(req.query.name)) - 1;
   games[id].id = id
   res.send(JSON.stringify(games[id]))
 })
 
-app.get('/move/:id', (req, res) => {
+app.get('game/:id/move', (req, res) => {
   let direction = req.query.direction;
   if (req.params.id > games.length) {
     console.log('tried to acces old game')
