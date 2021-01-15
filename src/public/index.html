@@ -38,6 +38,9 @@
                         <div v-for="tile in game.state" class="tile" :class="[tileToClass(tile)]">
                             <span class="center" v-if="tile > 0">{{tile}}</span>
                         </div>
+                        <div v-if="game.finished" class="finished">
+                            <h3 class="center">Game Finished</h3>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -159,10 +162,20 @@
     }
     
     .field {
+        position: relative;
         width: 200px;
         height: 200px;
         padding: 5px;
         background-color: #bbada0;
+    }
+
+    .finished {
+        position: absolute;
+        top: 0;
+        bottom: 0;
+        left: 0;
+        right: 0;
+        background-color: rgba(238, 228, 218, 0.7)
     }
     
     .tile {
