@@ -1,9 +1,19 @@
 const express = require('express')
 const ws = require('ws');
+const fs = require('fs');
 
 const rules = require('./game')
-const ObeservableStorage = require('./state')
+const ObeservableStorage = require('./state');
 
+let storedGames = []
+const dataStoragePath = './games.json';
+if (fs.existsSync(dataStoragePath)) {
+  storedGames = JSON.parse(fs.readFileSync(dataStoragePath))
+  if (!Array.isArray(storedGames)) {
+    console.log('Wrong type in json, found: ', typeof(storedGames))
+    storedGames = []
+  }
+}
 
 const app = express()
 const port = 3000
@@ -13,7 +23,7 @@ app.listen(port, () => {
 })
 
 // TODO: make sure to save this somewhere as well
-const games = new ObeservableStorage();
+const games = new ObeservableStorage(storedGames);
 
 
 // === Game Routes =====================
@@ -68,3 +78,26 @@ wss.on('connection', function connection(socket) {
 
 app.use('/overview', express.static('public'))
 
+
+
+// === handle closing ========================================
+// adapted from https://stackoverflow.com/questions/14031763/doing-a-cleanup-action-just-before-node-js-exits
+
+function exitHandler (options, exitCode) {
+  fs.writeFileSync(dataStoragePath, JSON.stringify(games.getall()))
+  if (exitCode || exitCode === 0) console.log(exitCode);
+  if (options.exit) process.exit();
+}
+
+//do something when app is closing
+process.on('exit', exitHandler.bind(null));
+
+//catches ctrl+c event
+process.on('SIGINT', exitHandler.bind(null, {exit:true}));
+
+// catches "kill pid" (for example: nodemon restart)
+process.on('SIGUSR1', exitHandler.bind(null, {exit:true}));
+process.on('SIGUSR2', exitHandler.bind(null, {exit:true}));
+
+//catches uncaught exceptions
+process.on('uncaughtException', exitHandler.bind(null, {exit:true}));

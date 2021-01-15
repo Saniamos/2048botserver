@@ -4,6 +4,8 @@ const request = require('request');
 const server = 'http://localhost:3000';
 const directions = ['left', 'up', 'right', 'down'];
 
+const sleepTime = 200;
+
 function get(url) {
   return new Promise((resolve, reject) => {
     request(url, (error, response, body) => {
@@ -39,7 +41,7 @@ async function play() {
   while (game.finished === false) {
     let direction = directions[getRandomInt(4)];
     game = await move(id, direction)
-    await sleep(500);
+    await sleep(sleepTime);
   }
 }
 

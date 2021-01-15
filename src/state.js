@@ -1,9 +1,9 @@
 const EventEmitter = require('events').EventEmitter;
 
 class ObeservableStorage extends EventEmitter {
-    constructor() {
+    constructor(initialState = []) {
         super();
-        this.state = []
+        this.state = initialState
     }
 
     add(item) {
