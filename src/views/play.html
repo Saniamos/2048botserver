@@ -3,55 +3,30 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>2048 Overview</title>
+    <title>2048</title>
 </head>
 <body>
     <div id="app" class="app">
         <div class="header">
             <h3>
-                2048 Games
+                2048 Game
             </h3>
         </div>
         <div class="games">
             <div>
-                <!-- <div class="game">
-                    <form class="field">
-                        <input type="text" value="New Game"/>
-                        <input type="button" value="Start"/>
-                    </form>
-                </div> -->
-                <div v-for="game in games" class="game">
-                    <h3 class="title">
-                        <span>{{game.name}}</span>
-                        <span>{{game.score}}</span>
-                    </h3>
-                    
-                    <a v-bind:href="'/game/'+game.id">
-                        <div class="field">
-                            <div v-for="tile in game.state" class="tile" :class="[tileToClass(tile)]">
-                                <span class="center" v-if="tile > 0">{{tile}}</span>
-                            </div>
-                        </div>
-                    </a>
-                </div>
-            </div>
-            <div>
-                <div v-for="game in finished" class="game">
-                    <h3 class="title">
-                        <span>{{game.name}}</span>
-                        <span>{{game.score}}</span>
-                    </h3>
-                    
-                    <a v-bind:href="'/game/'+game.id">
-                        <div class="field">
-                            <div v-for="tile in game.state" class="tile" :class="[tileToClass(tile)]">
-                                <span class="center" v-if="tile > 0">{{tile}}</span>
-                            </div>
-                            <div v-if="game.finished" class="finished">
-                                <h3 class="center">Game Finished</h3>
-                            </div>
-                        </div>
-                    </a>
+                <h3 class="title">
+                    <span>{{game.name}}</span>
+                    <span>{{game.score}}</span>
+                </h3>
+                
+                <div class="field" id="game"
+                v-on:swiped-down="move('down')"
+                v-on:swiped-left="move('left')"
+                v-on:swiped-right="move('right')"
+                v-on:swiped-up="move('up')">
+                    <div v-for="tile in game.state" class="tile" :class="[tileToClass(tile)]">
+                        <span class="center" v-if="tile > 0">{{tile}}</span>
+                    </div>
                 </div>
             </div>
         </div>
@@ -78,18 +53,49 @@
 </body>
 <script src="https://cdn.jsdelivr.net/npm/vue@2/dist/vue.js"></script>
 <script>
+
+
+    document.onkeydown = checkKey;
+
+    function checkKey(e) {
+        var lookup = {'38': 'up', '40': 'down', '37': 'left', '39': 'right'}
+
+        e = e || window.event;
+        let direction = lookup[e.keyCode];
+        if (direction !== undefined) {
+            move(direction)
+        }
+    }
+
+    function move (direction) {       
+        let url = `${location.href}/move?direction=${direction}`
+        if (location.href.endsWith('/')) {
+            url = `${location.href}move?direction=${direction}`
+        }
+
+        console.log(direction, url)
+
+        var xmlHttp = new XMLHttpRequest();
+        xmlHttp.open( "GET", url, true);
+        xmlHttp.send( null );
+    }
+   
+
     var app = new Vue({
         el: '#app',
         data: {
-                games: [],
-                finished: [], 
+                game: {},
                 leaderboard: [],
                 socket: null,
+                id: parseInt(location.pathname.split('/').filter( e => e != "").reverse()[0]),
                 connectionStatus: 0
         },
         methods: {
             tileToClass (tile) {
                 return 'tile-' + tile;
+            },
+            move (direction) {
+                move(direction);
             }
         },
         created: function() {
@@ -105,10 +111,6 @@
             this.socket.onclose = function(event) {
                 console.log('Socket disconnected')
                 app.connectionStatus = 0;
-                // TODO: implement auto reconnect
-                // setTimeout(() => {
-                //     this.socket = new WebSocket(socketUrl);
-                // }, 500);
             };
 
             this.socket.onerror = function(err) {
@@ -121,12 +123,12 @@
                 console.log('msg', msg, payload)
                 switch (msg) {
                     case 'service?':
-                        this.socket.send(JSON.stringify({msg: 'allgames'}));
+                        this.socket.send(JSON.stringify({msg: 'singlegame', options: {id: app.id}}));
                         break;
-                    case 'allgames':
-                        app.games = payload.filter(e => !e.finished).reverse();
-                        app.finished = payload.filter(e => e.finished).reverse();
-                        app.leaderboard = [...payload].sort((a, b) => a.score < b.score).slice(0, 21)
+                    case 'singlegame':
+                        const {game, leaderboard} = payload;
+                        app.game = game;
+                        app.leaderboard = leaderboard;
                         break;
                     default:
                         console.warn('Got unknown message type: ', msg)
@@ -140,6 +142,7 @@
         }
     })    
 </script>
+<script src="/overview/swipe-events.js"></script>
 <style>
     .center {
         position: absolute;
@@ -217,7 +220,6 @@
     }
     
     .game {
-        float: left;
         margin: 20px;
     }
     
@@ -228,9 +230,9 @@
     
     .field {
         position: relative;
-        width: 200px;
-        height: 200px;
-        padding: 5px;
+        width: 400px;
+        height: 400px;
+        padding: 10px;
         background-color: #bbada0;
         color: black;
     }
@@ -245,13 +247,14 @@
     }
     
     .tile {
-        width: 40px;
-        height: 40px;
-        margin: 5px;
+        width: 80px;
+        height: 80px;
+        margin: 10px;
         float: left;
         position: relative;
         color:#f9f6f2;
         background:#3c3a32;
+        font-size: 2em;
 
         font-family: clear sans, helvetica neue, Arial, sans-serif;
     }

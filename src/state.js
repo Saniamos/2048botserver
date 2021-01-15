@@ -8,6 +8,7 @@ class ObeservableStorage extends EventEmitter {
 
     add(item) {
         let id = this.state.push(item) - 1;
+        item.id = id;
         this.emit('add', {id, item});
         return id;
     }

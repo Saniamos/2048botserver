@@ -1,6 +1,7 @@
 const express = require('express')
 const ws = require('ws');
 const fs = require('fs');
+const path = require('path');
 
 const rules = require('./game')
 const ObeservableStorage = require('./state');
@@ -14,6 +15,8 @@ if (fs.existsSync(dataStoragePath)) {
     storedGames = []
   }
 }
+const games = new ObeservableStorage(storedGames);
+
 
 const app = express()
 const port = 3000
@@ -21,9 +24,6 @@ const port = 3000
 app.listen(port, () => {
   console.log(`Example app listening at http://localhost:${port}`)
 })
-
-// TODO: make sure to save this somewhere as well
-const games = new ObeservableStorage(storedGames);
 
 
 // === Game Routes =====================
@@ -39,7 +39,6 @@ app.get('/game/:id/move', (req, res) => {
   let game = games.get(id);
 
   if (!game.finished) {
-    // game.finished = Math.random() > 0.95;
     let {newState, newScore} = rules.move(direction, game.state)
     if (!rules.stateChanged(game.state, newState)) {
       game.state = rules.addTile(newState);
@@ -49,33 +48,86 @@ app.get('/game/:id/move', (req, res) => {
     games.udpate(id, game)
   }
   console.log(id, direction, game.score, game.finished);
-  res.send(JSON.stringify({id, ...game}))
+  res.send(JSON.stringify(game))
 })
 
-app.get('/game/:id', (req, res) => {
+app.get('/game/:id/data', (req, res) => {
   let id = req.params.id;
   let game = games.get(id);
-  res.send(JSON.stringify({id, ...game}))
+  res.send(JSON.stringify(game))
 })
+
+// === Play Sites =================================
+
+app.get('/game/:id', function(req, res) {
+  res.sendFile(path.join(__dirname + '/views/play.html'));
+});
 
 
 // === Overview API =====================
 const wss = new ws.Server({ port: 3001 });
 
-wss.on('connection', function connection(socket) {
-  let sendAll = () => socket.send(JSON.stringify(games.getall()))
-  
-  sendAll()
 
-  games.on('add', sendAll)
-  games.on('change', sendAll)
+function wsSend (socket, msg, payload) {
+  socket.send(JSON.stringify({msg, payload}))
+}
+
+function setupListeners(socket, fn) {
+  console.log('Setting up listeners')
+
+  games.on('add', fn)
+  games.on('change', fn)
 
   socket.on('close', () => {
-    games.removeListener('add', sendAll);
-    games.removeListener('change', sendAll);
+    console.log('Cleaning listeners')
+    games.removeListener('add', fn);
+    games.removeListener('change', fn);
   })
+  return true;
+}
+
+wss.on('connection', function connection(socket) {
+  let allgames = false;
+  let singlegame = false;
+
+  socket.on('message', (e) => {
+    try {
+      const {msg, options} = JSON.parse(e);
+      let fn = () => {};
+      console.log(msg, options)
+      switch (msg) {
+        case 'allgames': 
+          fn = () => wsSend(socket, 'allgames', games.getall())
+          if (!allgames) {
+            allgames = setupListeners(socket, fn)
+            fn();
+          }
+          break;
+        case 'singlegame':
+          fn = ({id}) => {
+            // if (id === options.id) {
+              let leaderboard = games.getall().map(e => ({score: e.score, name: e.name})).sort((a, b) => b.score - a.score)
+              wsSend(socket, 'singlegame', {game: games.get(options.id), leaderboard: leaderboard})
+            // }
+          }
+          if (!singlegame) {
+            singlegame = setupListeners(socket, fn)
+            fn({id: options.id})
+          }
+          break;
+        default: 
+          console.log('Unknown message: ', msg)
+      }
+    } catch (error) {
+      console.log(error)
+      console.log('Error while handling message', e)
+    }
+  })
+
+  wsSend(socket, 'service?')
 });
 
+// maybe not use this as static server?
 app.use('/overview', express.static('public'))
 
 

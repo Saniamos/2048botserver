@@ -4,7 +4,7 @@ const request = require('request');
 const server = 'http://localhost:3000';
 const directions = ['left', 'up', 'right', 'down'];
 
-const sleepTime = 200;
+const sleepTime = 10;
 
 function get(url) {
   return new Promise((resolve, reject) => {
