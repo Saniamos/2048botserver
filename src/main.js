@@ -2,6 +2,9 @@ const express = require('express')
 const app = express()
 const port = 3000
 
+var morgan = require('morgan')
+app.use(morgan('combined'))
+
 const expressWs = require('express-ws')(app);
 app.listen(port, () => {
   console.log(`Example app listening at http://localhost:${port}`)
@@ -10,6 +13,11 @@ app.listen(port, () => {
 const ObeservableStorage = require('./state');
 // TODO: make sure to save this somewhere as well
 const games = new ObeservableStorage();
+
+// app.use(function(error, req, res, next) {
+//   console.log('all', error, req, res, next)
+//   return {error, req, res, next}
+// });
 
 // === Game API =====================
 
@@ -47,23 +55,35 @@ app.get('/game/:id', (req, res) => {
 })
 
 
+
+// app.all('*', function(req, res) {
+//   throw new Error("Bad request")
+// })
+
+// app.use(function(e, req, res, next) {
+//   if (e.message === "Bad request") {
+//       res.status(400).json({error: {msg: e.message, stack: e.stack}});
+//   }
+// });
+
 // === Overview API =====================
 
-app.use('/overview', express.static('public'))
+// app.use('/overview', express.static('public'))
 
-app.ws('/api/overview', (ws, req) => {
-  let sendAll = () => ws.send(JSON.stringify(games.getall()))
+// app.ws('/api/overview', (ws, req) => {
+//   let sendAll = () => ws.send(JSON.stringify(games.getall()))
   
-  sendAll()
+//   sendAll()
 
-  games.on('add', sendAll)
-  games.on('change', sendAll)
+//   games.on('add', sendAll)
+//   games.on('change', sendAll)
 
-  ws.on('close', () => {
-    games.removeListener('add', sendAll);
-    games.removeListener('change', sendAll);
-  })
-});
+//   ws.on('close', () => {
+//     games.removeListener('add', sendAll);
+//     games.removeListener('change', sendAll);
+//   })
+// });
+
 
 
 // === Game Rules =====================
