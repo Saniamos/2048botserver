@@ -2,7 +2,8 @@ const express = require('express')
 const app = express()
 const port = 3000
 
-const expressWs = require('express-ws')(app);
+const ws = require('ws');
+
 app.listen(port, () => {
   console.log(`Example app listening at http://localhost:${port}`)
 })
@@ -49,21 +50,23 @@ app.get('/game/:id', (req, res) => {
 
 // === Overview API =====================
 
-app.use('/overview', express.static('public'))
+const wss = new ws.Server({ port: 3001 });
 
-app.ws('/api/overview', (ws, req) => {
-  let sendAll = () => ws.send(JSON.stringify(games.getall()))
+wss.on('connection', function connection(socket) {
+  let sendAll = () => socket.send(JSON.stringify(games.getall()))
   
   sendAll()
 
   games.on('add', sendAll)
   games.on('change', sendAll)
 
-  ws.on('close', () => {
+  socket.on('close', () => {
     games.removeListener('add', sendAll);
     games.removeListener('change', sendAll);
   })
 });
+
+app.use('/overview', express.static('public'))
 
 
 // === Game Rules =====================

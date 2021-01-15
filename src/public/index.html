@@ -75,7 +75,7 @@
         },
         created: function() {
             const socketProtocol = (window.location.protocol === 'https:' ? 'wss:' : 'ws:')
-            const echoSocketUrl = socketProtocol + '//' + window.location.hostname + ':3000/api/overview/'
+            const echoSocketUrl = socketProtocol + '//' + window.location.hostname + ':3001/'
             this.socket = new WebSocket(echoSocketUrl);
             
             this.socket.onmessage = e => {
