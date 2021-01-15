@@ -16,8 +16,8 @@
             <div>
                 <div class="game">
                     <form class="field">
-                        <input type="text" value="New Game"/>
-                        <input type="button" value="Start"/>
+                        <input type="text" v-model="gamename" placeholder="Game name"/>
+                        <input type="button" v-on:click="start()" value="Start"/>
                     </form>
                 </div>
                 <div v-for="game in games" class="game">
@@ -47,8 +47,8 @@
                             <div v-for="tile in game.state" class="tile" :class="[tileToClass(tile)]">
                                 <span class="center" v-if="tile > 0">{{tile}}</span>
                             </div>
-                            <div v-if="game.finished" class="finished">
-                                <h3 class="center">Game Finished</h3>
+                            <div class="finished">
+                                <h4 class="center">Game Over!</h4>
                             </div>
                         </div>
                     </a>
@@ -85,11 +85,19 @@
                 finished: [], 
                 leaderboard: [],
                 socket: null,
-                connectionStatus: 0
+                connectionStatus: 0,
+                gamename: 'New Game'
         },
         methods: {
             tileToClass (tile) {
                 return 'tile-' + tile;
+            },
+            start () {
+                var basis = `${window.location.protocol}//${window.location.hostname}:3000/game`;
+                var xmlHttp = new XMLHttpRequest();
+                xmlHttp.open( "GET", `${basis}/start?name=${app.gamename}`, false);
+                xmlHttp.send( null );
+                window.open(`${basis}/${JSON.parse(xmlHttp.responseText).id}`)
             }
         },
         created: function() {
@@ -140,193 +148,5 @@
         }
     })    
 </script>
-<style>
-    .center {
-        position: absolute;
-        left: 50%;
-        top: 50%;
-        transform: translate(-50%, -50%);
-    }
-
-    .absFill {
-        position: absolute;
-        top: 0;
-        right: 0;
-        bottom: 0;
-        left: 0;
-    }
-
-    .lostConnection {
-        background-color: rgba(238, 228, 218, 0.7);
-    }
-
-    .header {
-        grid-column-start: 1;
-        grid-column-end: span col2;
-        grid-row-start: 1;
-        grid-row-end: 1;
-    }
-
-    .header h3 {
-        border-bottom: 1px solid grey;
-        width: 100%;
-        padding: 24px 0;
-        text-align: center;
-    }
-    
-    .app {
-        display: grid;
-
-        grid-template-columns: auto 200px;
-        grid-template-rows: 100px auto;
-
-        font-family: clear sans, helvetica neue, Arial, sans-serif;
-    }
-    
-    .leaderboardContainer {
-        grid-column-start: 2;
-        grid-column-end: 2;
-        grid-row-start: 2;
-        grid-row-end: 2;
-    }
-
-    .leaderboard {
-        margin: 0 8px;
-    }
-
-    .leaderboard .scoreEntry {
-        padding: 5px;
-        display: flex;
-        justify-content: space-between;
-    }
-
-    .leaderboard .scoreEntry:nth-child(2n){
-        background-color: #eee4da;
-    }
-    
-    .games {
-        grid-column-start: 1;
-        grid-column-end: 1;
-        grid-row-start: 2;
-        grid-row-end: 2;
-
-        display: flex;
-        flex-direction: column;
-
-        position: relative;
-    }
-    
-    .game {
-        float: left;
-        margin: 20px;
-    }
-    
-    .title {
-        display: flex;
-        justify-content: space-between;
-    }
-    
-    .field {
-        position: relative;
-        width: 200px;
-        height: 200px;
-        padding: 5px;
-        background-color: #bbada0;
-        color: black;
-    }
-
-    .finished {
-        position: absolute;
-        top: 0;
-        bottom: 0;
-        left: 0;
-        right: 0;
-        background-color: rgba(238, 228, 218, 0.7)
-    }
-
-    .finished .center {
-        margin: 0;
-    }
-    
-    .tile {
-        width: 40px;
-        height: 40px;
-        margin: 5px;
-        float: left;
-        position: relative;
-        color:#f9f6f2;
-        background:#3c3a32;
-
-        font-family: clear sans, helvetica neue, Arial, sans-serif;
-    }
-    
-    .tile.tile-0 {
-        color: #776e65;
-        background: rgba(238, 228, 218, 0.35);
-    }
-    
-    
-    .tile.tile-2 {
-        color: #776e65;
-        background:#eee4da;
-        box-shadow:0 0 30px 10px transparent,inset 0 0 0 1px transparent
-    }
-    .tile.tile-4 {
-        color: #776e65;
-        background:#ede0c8;
-        box-shadow:0 0 30px 10px transparent,inset 0 0 0 1px transparent
-    }
-    .tile.tile-8 {
-        color: #776e65;
-        color:#f9f6f2;
-        background:#f2b179;
-    }
-    .tile.tile-16 {
-        color: #776e65;
-        color:#f9f6f2;
-        background:#f59563;
-    }
-    .tile.tile-32 {
-        color: #776e65;
-        color:#f9f6f2;
-        background:#f67c5f;
-    }
-    .tile.tile-64 {
-        color: #776e65;
-        color:#f9f6f2;
-        background:#f65e3b;
-    }
-    .tile.tile-128 {
-        color:#f9f6f2;
-        background:#edcf72;
-        box-shadow:0 0 30px 10px rgba(243,215,116,.2381),inset 0 0 0 1px rgba(255,255,255,.14286);
-    }
-    
-    .tile.tile-256 {
-        color:#f9f6f2;
-        background:#edcc61;
-        box-shadow:0 0 30px 10px rgba(243,215,116,.31746),inset 0 0 0 1px rgba(255,255,255,.19048);
-    }
-    
-    .tile.tile-512 {
-        color:#f9f6f2;
-        background:#edc850;
-        box-shadow:0 0 30px 10px rgba(243,215,116,.39683),inset 0 0 0 1px rgba(255,255,255,.2381);
-    }
-    
-    .tile.tile-1024 {
-        color:#f9f6f2;
-        background:#edc53f;
-        box-shadow:0 0 30px 10px rgba(243,215,116,.47619),inset 0 0 0 1px rgba(255,255,255,.28571);
-    }
-    
-    .tile.tile-2048 {
-        color:#f9f6f2;
-        background:#edc22e;
-        box-shadow:0 0 30px 10px rgba(243,215,116,.55556),inset 0 0 0 1px rgba(255,255,255,.33333);
-    }
-
-    
-    
-</style>
+<link rel="stylesheet" href="/overview/game.css"></link>
 </html>
