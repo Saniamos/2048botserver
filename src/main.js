@@ -106,7 +106,7 @@ wss.on('connection', function connection(socket) {
         case 'singlegame':
           fn = ({id}) => {
             // if (id === options.id) {
-              let leaderboard = games.getall().map(e => ({score: e.score, name: e.name})).sort((a, b) => b.score - a.score)
+              let leaderboard = games.getall().map(e => ({score: e.score, name: e.name})).sort((a, b) => b.score - a.score).slice(0, 11)
               wsSend(socket, 'singlegame', {game: games.get(options.id), leaderboard: leaderboard})
             // }
           }

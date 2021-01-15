@@ -6,7 +6,7 @@
     <title>2048</title>
 </head>
 <body>
-    <div id="app" class="app">
+    <div id="app" class="app absFill">
         <div class="header">
             <h3>
                 2048 Game
@@ -26,6 +26,9 @@
                 v-on:swiped-up="move('up')">
                     <div v-for="tile in game.state" class="tile" :class="[tileToClass(tile)]">
                         <span class="center" v-if="tile > 0">{{tile}}</span>
+                    </div>
+                    <div v-if="game.finished" class="finished">
+                        <h3 class="center">Game Over!</h3>
                     </div>
                 </div>
             </div>
@@ -67,6 +70,7 @@
         }
     }
 
+    // TODO: prevent scrolling when swiping
     function move (direction) {       
         let url = `${location.href}/move?direction=${direction}`
         if (location.href.endsWith('/')) {
@@ -185,7 +189,8 @@
 
         font-family: clear sans, helvetica neue, Arial, sans-serif;
     }
-    
+
+
     .leaderboardContainer {
         grid-column-start: 2;
         grid-column-end: 2;
@@ -193,8 +198,62 @@
         grid-row-end: 2;
     }
 
+    .games {
+        grid-column-start: 1;
+        grid-column-end: 1;
+        grid-row-start: 2;
+        grid-row-end: 2;
+
+        display: flex;
+        flex-direction: column;
+
+        position: relative;
+    }
+
+    @media only screen 
+        and (min-device-width: 375px) 
+        and (max-device-width: 667px) 
+        and (-webkit-min-device-pixel-ratio: 2)
+        and (orientation: portrait) { 
+
+        .app {
+            display: grid;
+
+            grid-template-columns: [content-start] auto;
+            grid-template-rows: [header-start] 100px [content-start] 400px [leaderboard-start] auto;
+
+            font-family: clear sans, helvetica neue, Arial, sans-serif;
+        }
+
+        .header {
+            grid-column-start: content-start;
+            grid-column-end: content-start;
+            grid-row-start: header-start;
+            grid-row-end: header-start;
+        }
+
+        .leaderboardContainer {
+            grid-column-start: content-start;
+            grid-column-end: content-start;
+            grid-row-start: leaderboard-start;
+            grid-row-end: leaderboard-start;
+        }
+
+        .games {
+            grid-column-start: content-start;
+            grid-column-end: content-start;
+            grid-row-start: content-start;
+            grid-row-end: content-start;
+
+            flex-direction: row;
+            position: relative;
+            justify-content: space-around;
+        }
+    }
+
     .leaderboard {
         margin: 0 8px;
+        text-align: center;
     }
 
     .leaderboard .scoreEntry {
@@ -207,32 +266,23 @@
         background-color: #eee4da;
     }
     
-    .games {
-        grid-column-start: 1;
-        grid-column-end: 1;
-        grid-row-start: 2;
-        grid-row-end: 2;
-
-        display: flex;
-        flex-direction: column;
-
-        position: relative;
-    }
     
     .game {
         margin: 20px;
     }
     
     .title {
+        width: 290px;
         display: flex;
         justify-content: space-between;
     }
     
     .field {
         position: relative;
-        width: 400px;
-        height: 400px;
-        padding: 10px;
+        width: 280px;
+        height: 280px;
+        padding: 5px;
+        border-radius: 3px;
         background-color: #bbada0;
         color: black;
     }
@@ -245,16 +295,21 @@
         right: 0;
         background-color: rgba(238, 228, 218, 0.7)
     }
+
+    .finished .center {
+        margin: 0;
+    }
     
     .tile {
-        width: 80px;
-        height: 80px;
-        margin: 10px;
+        border-radius: 3px;
+        width: 60px;
+        height: 60px;
+        margin: 5px;
         float: left;
         position: relative;
         color:#f9f6f2;
         background:#3c3a32;
-        font-size: 2em;
+        font-size: 1.7em;
 
         font-family: clear sans, helvetica neue, Arial, sans-serif;
     }

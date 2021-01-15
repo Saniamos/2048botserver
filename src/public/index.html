@@ -14,12 +14,12 @@
         </div>
         <div class="games">
             <div>
-                <!-- <div class="game">
+                <div class="game">
                     <form class="field">
                         <input type="text" value="New Game"/>
                         <input type="button" value="Start"/>
                     </form>
-                </div> -->
+                </div>
                 <div v-for="game in games" class="game">
                     <h3 class="title">
                         <span>{{game.name}}</span>
@@ -242,6 +242,10 @@
         left: 0;
         right: 0;
         background-color: rgba(238, 228, 218, 0.7)
+    }
+
+    .finished .center {
+        margin: 0;
     }
     
     .tile {
