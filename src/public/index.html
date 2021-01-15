@@ -54,19 +54,23 @@
                 </div>
             </div>
         </div>
+        <div class="absFill lostConnection" v-if="!connected">
+            <div class="center">
+                <h1>Connection Lost :/ Please try reloading the page.</h1>
+            </div>
+        </div>
     </div>
 </body>
 <script src="https://cdn.jsdelivr.net/npm/vue@2/dist/vue.js"></script>
 <script>
     var app = new Vue({
         el: '#app',
-        data: function () {
-            return {
+        data: {
                 games: [],
                 finished: [], 
                 leaderboard: [],
-                socket: null
-            }
+                socket: null,
+                connected: false
         },
         methods: {
             tileToClass (tile) {
@@ -77,13 +81,28 @@
             const socketProtocol = (window.location.protocol === 'https:' ? 'wss:' : 'ws:')
             const echoSocketUrl = socketProtocol + '//' + window.location.hostname + ':3001/'
             this.socket = new WebSocket(echoSocketUrl);
+
+            this.socket.onopen = function(event) {
+                console.log('Socket connected')
+                app.connected = true;
+            };
+
+            this.socket.onclose = function(event) {
+                console.log('Socket disconnected')
+                app.connected = false;
+            };
             
             this.socket.onmessage = e => {
                 let games = JSON.parse(e.data);
-                this.games = games.filter(e => !e.finished)
-                this.finished = games.filter(e => e.finished)
-                this.leaderboard = [...games].sort((a, b) => a.score < b.score).slice(0, 21)
+                app.games = games.filter(e => !e.finished).reverse();
+                app.finished = games.filter(e => e.finished).reverse();
+                app.leaderboard = [...games].sort((a, b) => a.score < b.score).slice(0, 21)
             }
+
+            window.onbeforeunload = function() {
+                this.socket.close();
+                return true;
+            };
             
             // TODO: onclose => show message to reload / reconnect
         }
@@ -95,6 +114,18 @@
         left: 50%;
         top: 50%;
         transform: translate(-50%, -50%);
+    }
+
+    .absFill {
+        position: absolute;
+        top: 0;
+        right: 0;
+        bottom: 0;
+        left: 0;
+    }
+
+    .lostConnection {
+        background-color: rgba(238, 228, 218, 0.7);
     }
 
     .header {
@@ -149,6 +180,8 @@
 
         display: flex;
         flex-direction: column;
+
+        position: relative;
     }
     
     .game {
