@@ -15,10 +15,12 @@
         <div class="games">
             <div>
                 <div class="game">
-                    <form class="field">
-                        <input type="text" v-model="gamename" placeholder="Game name"/>
-                        <input type="button" v-on:click="start()" value="Start"/>
-                    </form>
+                    <div class="newGameTile">
+                        <form class="field">
+                            <input type="text" v-model="gamename" placeholder="Game name"/>
+                            <input type="button" v-on:click="start()" value="Start"/>
+                        </form>
+                    </div>
                 </div>
                 <div v-for="game in games" class="game">
                     <h3 class="title">
@@ -64,12 +66,12 @@
                 </div>
             </div>
         </div>
-        <div class="absFill lostConnection" v-if="connectionStatus === 0">
+        <div class="absContainer lostConnection" v-if="connectionStatus === 0">
             <div class="center">
                 <h1>Connection Lost :/ Please try reloading the page.</h1>
             </div>
         </div>
-        <div class="absFill lostConnection" v-if="connectionStatus === -1">
+        <div class="absContainer lostConnection" v-if="connectionStatus === -1">
             <div class="center">
                 <h1>Connection Error :/ Please try again later or restart the server.</h1>
             </div>
@@ -149,4 +151,12 @@
     })    
 </script>
 <link rel="stylesheet" href="/overview/game.css"></link>
+<style>
+    .newGameTile .field {
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+    }
+
+</style>
 </html>

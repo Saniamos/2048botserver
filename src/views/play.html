@@ -6,29 +6,31 @@
     <title>2048</title>
 </head>
 <body>
-    <div id="app" class="app absFill">
+    <div id="app" class="app absContainer">
         <div class="header">
             <h3>
                 2048 Game
             </h3>
         </div>
         <div class="games">
-            <div>
-                <h3 class="title">
-                    <span>{{game.name}}</span>
-                    <span>{{game.score}}</span>
-                </h3>
-                
-                <div class="field" id="game"
-                v-on:swiped-down="move('down')"
-                v-on:swiped-left="move('left')"
-                v-on:swiped-right="move('right')"
-                v-on:swiped-up="move('up')">
-                    <div v-for="tile in game.state" class="tile" :class="[tileToClass(tile)]">
-                        <span class="center" v-if="tile > 0">{{tile}}</span>
-                    </div>
-                    <div v-if="game.finished" class="finished">
-                        <h3 class="center">Game Over!</h3>
+            <div class="gameContainer square">
+                <div class="absFill">
+                    <!-- <h3 class="title">
+                        <span>{{game.name}}</span>
+                        <span>{{game.score}}</span>
+                    </h3> -->
+                    
+                    <div class="field" id="game"
+                    v-on:swiped-down="move('down')"
+                    v-on:swiped-left="move('left')"
+                    v-on:swiped-right="move('right')"
+                    v-on:swiped-up="move('up')">
+                        <div v-for="tile in game.state" class="tile" :class="[tileToClass(tile)]">
+                            <span class="center" v-if="tile > 0">{{tile}}</span>
+                        </div>
+                        <div v-if="game.finished" class="finished">
+                            <h3 class="center">Game Over!</h3>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -42,12 +44,12 @@
                 </div>
             </div>
         </div>
-        <div class="absFill lostConnection" v-if="connectionStatus === 0">
+        <div class="absContainer lostConnection" v-if="connectionStatus === 0">
             <div class="center">
                 <h1>Connection Lost :/ Please try reloading the page.</h1>
             </div>
         </div>
-        <div class="absFill lostConnection" v-if="connectionStatus === -1">
+        <div class="absContainer lostConnection" v-if="connectionStatus === -1">
             <div class="center">
                 <h1>Connection Error :/ Please try again later or restart the server.</h1>
             </div>
@@ -71,7 +73,6 @@
         e.preventDefault();
     }
 
-    // TODO: prevent scrolling when swiping
     function move (direction) {       
         let url = `${location.href}/move?direction=${direction}`
         if (location.href.endsWith('/')) {
@@ -150,17 +151,51 @@
 <link rel="stylesheet" href="/overview/game.css"></link>
 <style>
 
+
+.app {
+    display: grid;
+
+    grid-template-columns: 1fr 200px;
+    grid-template-rows: 100px auto;
+
+    font-family: clear sans, helvetica neue, Arial, sans-serif;
+}
+
+.games {
+    display: block;
+    position: relative;
+}
+
+.gameContainer {
+    width: 50%;
+    position: relative;
+    margin: 0 auto;
+}
+
+.field {
+    width: 96%;
+    height: 96%;
+    padding: 2%;
+}
+
+.tile {
+    width: 21%;
+    height: 21%;
+    margin: 2%;
+    font-size: 1.7em;
+}
+
 @media only screen 
-    and (min-device-width: 375px) 
-    and (max-device-width: 667px) 
+    and (min-device-width: 350px) 
+    and (max-device-width: 800px) 
     and (-webkit-min-device-pixel-ratio: 2)
     and (orientation: portrait) { 
 
     .app {
         display: grid;
 
-        grid-template-columns: [content-start] auto;
-        grid-template-rows: [header-start] 100px [content-start] 400px [leaderboard-start] auto;
+        grid-template-columns: [content-start] 1fr;
+        grid-template-rows: [header-start] 100px [content-start] 90vw [leaderboard-start] auto;
 
         font-family: clear sans, helvetica neue, Arial, sans-serif;
     }
@@ -184,33 +219,14 @@
         grid-column-end: content-start;
         grid-row-start: content-start;
         grid-row-end: content-start;
-
-        flex-direction: row;
-        position: relative;
-        justify-content: space-around;
     }
 
-
-    .title {
-        width: 290px;
+    .gameContainer {
+        width: 80%;
     }
-
-    .field {
-        width: 280px;
-        height: 280px;
-        padding: 5px;
-        border-radius: 3px;
-    }
-
-    .tile {
-        border-radius: 3px;
-        width: 60px;
-        height: 60px;
-        margin: 5px;
-        font-size: 1.7em;
-    }
-
 }
+
+
 </style>
 <script src="/overview/swipe-events.js"></script>
 <style>
