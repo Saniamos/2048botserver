@@ -13,18 +13,18 @@
             </h3>
         </div>
         <div class="games">
+            <h3 class="title">
+                <span>{{game.name}}</span>
+                <span>{{game.score}}</span>
+            </h3>
+            
             <div class="gameContainer square">
                 <div class="absFill">
-                    <!-- <h3 class="title">
-                        <span>{{game.name}}</span>
-                        <span>{{game.score}}</span>
-                    </h3> -->
-                    
                     <div class="field" id="game"
-                    v-on:swiped-down="move('down')"
-                    v-on:swiped-left="move('left')"
-                    v-on:swiped-right="move('right')"
-                    v-on:swiped-up="move('up')">
+                v-on:swiped-down="move('down')"
+                v-on:swiped-left="move('left')"
+                v-on:swiped-right="move('right')"
+                v-on:swiped-up="move('up')">
                         <div v-for="tile in game.state" class="tile" :class="[tileToClass(tile)]">
                             <span class="center" v-if="tile > 0">{{tile}}</span>
                         </div>
@@ -164,12 +164,13 @@
 .games {
     display: block;
     position: relative;
+    width: 50%;
+    margin: 0 auto;
 }
 
 .gameContainer {
-    width: 50%;
+    width: 100%;
     position: relative;
-    margin: 0 auto;
 }
 
 .field {
@@ -195,7 +196,7 @@
         display: grid;
 
         grid-template-columns: [content-start] 1fr;
-        grid-template-rows: [header-start] 100px [content-start] 90vw [leaderboard-start] auto;
+        grid-template-rows: [header-start] 100px [content-start] 100vw [leaderboard-start] auto;
 
         font-family: clear sans, helvetica neue, Arial, sans-serif;
     }
@@ -219,9 +220,7 @@
         grid-column-end: content-start;
         grid-row-start: content-start;
         grid-row-end: content-start;
-    }
 
-    .gameContainer {
         width: 80%;
     }
 }
