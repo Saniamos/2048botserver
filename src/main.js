@@ -40,9 +40,7 @@ app.get('/game/:id/move', (req, res) => {
 
   if (!game.finished) {
     let {newState, newScore} = rules.move(direction, game.state)
-    if (!rules.stateChanged(game.state, newState)) {
-      game.state = rules.addTile(newState);
-    } 
+    game.state = newState;
     game.score = game.score + newScore;
     game.finished = rules.checkFinished(game.state)
     games.udpate(id, game)

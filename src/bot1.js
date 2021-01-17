@@ -6,6 +6,8 @@ const directions = ['left', 'up', 'right', 'down'];
 
 const sleepTime = 10;
 
+// Strategy: just pick random
+
 function get(url) {
   return new Promise((resolve, reject) => {
     request(url, (error, response, body) => {
@@ -32,14 +34,14 @@ async function start (name) {
   return {id: game.id, game};
 } 
 
-function getRandomInt(max) {
-  return Math.floor(Math.random() * Math.floor(max));
+function pick_rand(arr) {
+  return arr[Math.floor(Math.random() * Math.floor(arr.length))];
 }
 
 async function play() {
   var {id, game} = await start('Bot: Random')
   while (game.finished === false) {
-    let direction = directions[getRandomInt(4)];
+    let direction = pick_rand(directions);
     game = await move(id, direction)
     await sleep(sleepTime);
   }

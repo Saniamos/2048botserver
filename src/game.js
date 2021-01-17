@@ -26,8 +26,15 @@ function createGame (name) {
   return game;
 }
 
-
 function move (direction, state) {
+  let {newState, newScore} = move_direction(direction, state);
+  if (!stateChanged(state, newState)) {
+    newState = addTile(newState);
+  } 
+  return {newState, newScore}
+}
+
+function move_direction (direction, state) {
   switch (direction) {
     case 'left':
       return moveLeft(state)
