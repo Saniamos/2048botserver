@@ -1,4 +1,7 @@
 const request = require('request');
+const rules = require('./game')
+
+const directions = ['left', 'up', 'right', 'down'];
 
 function get(url) {
   return new Promise((resolve, reject) => {
@@ -39,11 +42,31 @@ async function play(server, name, pick_fn, sleepTime=100) {
   }
 }
 
+// returns nested structure: {left: {left: {newState, newScore}, right: {} ...} ...}
+function calc_advance (state, future = 1) {
+  if (future < 1) {
+    return state;
+  }
+
+  let states = {}
+  
+  for (let dir of directions) {
+    let {newState, newScore} = rules.move(dir, state.newState)
+    states[dir] = {newScore: newScore + state.newScore, newState}
+    if (future > 1) {
+      states[dir] = calc_advance(states[dir], future - 1)
+    }
+  }
+  return states
+}
+
 module.exports = {
   get: get,
   play: play,
   sleep: sleep,
   move: move,
   start: start,
-  pick_rand: pick_rand
+  pick_rand: pick_rand,
+  calc_advance: calc_advance,
+  directions: directions
 }

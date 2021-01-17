@@ -28,7 +28,7 @@ function createGame (name) {
 
 function move (direction, state) {
   let {newState, newScore} = move_direction(direction, state);
-  if (!stateChanged(state, newState)) {
+  if (!stateUnChanged(state, newState)) {
     newState = addTile(newState);
   } 
   return {newState, newScore}
@@ -108,7 +108,7 @@ function checkFinished (state) {
     || hasTwoEqualNeighbors(rotate16Board(state)));
 }
 
-function stateChanged (state, newState) {
+function stateUnChanged (state, newState) {
   return state.reduce((prv, cur, id) => prv && cur === newState[id], true)
 }
 
@@ -118,9 +118,10 @@ module.exports = {
   addTile: addTile,
   createGame: createGame,
   move: move,
+  move_direction: move_direction,
   moveLeft: moveLeft,
   rotate16Board: rotate16Board,
   hasTwoEqualNeighbors: hasTwoEqualNeighbors,
   checkFinished: checkFinished,
-  stateChanged: stateChanged
+  stateUnChanged: stateUnChanged
 }
