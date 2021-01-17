@@ -23,10 +23,10 @@
                     </div>
                 </div>
                 <div v-for="game in games" class="game">
-                    <h3 class="title">
+                    <h4 class="title">
                         <span>{{game.name}}</span>
                         <span>{{game.score}}</span>
-                    </h3>
+                    </h4>
                     
                     <a v-bind:href="'/game/'+game.id">
                         <div class="field">
@@ -39,10 +39,10 @@
             </div>
             <div>
                 <div v-for="game in finished" class="game">
-                    <h3 class="title">
+                    <h4 class="title">
                         <span>{{game.name}}</span>
                         <span>{{game.score}}</span>
-                    </h3>
+                    </h4>
                     
                     <a v-bind:href="'/game/'+game.id">
                         <div class="field">

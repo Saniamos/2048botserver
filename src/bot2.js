@@ -1,13 +1,13 @@
 
-const request = require('request');
 const rules = require('./game');
+const {play, pick_rand} = require('./bot_helpers');
 
 const server = 'http://localhost:3000';
 const directions = ['left', 'up', 'right', 'down'];
 
 const sleepTime = 100;
 
-const turnsInAdvance = 4;
+const turnsInAdvance = 2;
 const name = `Bot: FS - ${turnsInAdvance}`
 // Strategy: calc x turns in advance and then pick highest score for next move
 
@@ -59,46 +59,7 @@ function pick_promising (state) {
   return pick_rand(options)
 }
 
-function pick_rand(arr) {
-  return arr[Math.floor(Math.random() * Math.floor(arr.length))];
-}
 
-// === bot ===============
-function get(url) {
-  return new Promise((resolve, reject) => {
-    request(url, (error, response, body) => {
-      if (error) reject(error);
-      if (response.statusCode != 200) {
-        reject('Invalid status code <' + response.statusCode + '>');
-      }
-      resolve(JSON.parse(body));
-    });
-  });
-}
+// === start ===============
 
-function sleep(ms) {
-  return new Promise(resolve => setTimeout(resolve, ms));
-}
-
-async function move (id, direction) {
-  let game = await get(`${server}/game/${id}/move?direction=${direction}`)
-  return game; 
-}
-
-async function start (name) {
-  let game = await get(`${server}/game/start?name=${name}`)
-  return {id: game.id, game};
-} 
-
-
-async function play() {
-  var {id, game} = await start(name)
-  while (game.finished === false) {
-    let direction = pick_promising(game.state);
-    game = await move(id, direction)
-    await sleep(sleepTime);
-  }
-}
-
-
-play()
+play(server, name, pick_promising, sleepTime)
