@@ -30,7 +30,14 @@ async function start (server, name) {
 } 
 
 function pick_rand(arr) {
-  return arr[Math.floor(Math.random() * Math.floor(arr.length))];
+  // TODO: is this truly equal?
+  return arr[Math.floor(Math.random() * arr.length)];
+}
+
+// picks the first entries with higher prob than the others
+// always halfs probability with each index passed
+function pick_biased (arr) {
+  return arr.filter((_, i) => i + 1 === arr.length || Math.random() < 0.5)[0]
 }
 
 async function play(server, name, pick_fn, sleepTime=100) {
@@ -67,6 +74,7 @@ module.exports = {
   move: move,
   start: start,
   pick_rand: pick_rand,
+  pick_biased: pick_biased,
   calc_advance: calc_advance,
   directions: directions
 }

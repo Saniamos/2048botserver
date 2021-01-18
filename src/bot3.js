@@ -6,7 +6,7 @@ const server = 'http://localhost:3000';
 
 const sleepTime = 30;
 
-const turnsInAdvance = 2;
+const turnsInAdvance = 4;
 const name = `Bot: Sort - ${turnsInAdvance}`
 // Strategy: try to sort the tiles into a corner
 
@@ -28,8 +28,8 @@ function calc_mean_leaf_scores (states) {
   }
 
   // TODO: eval different merge strategies
-  return directions.map(e => calc_mean_leaf_scores(states[e])).reduce((prv, cur) => prv + cur, 0)
-  // return directions.map(e => calc_mean_leaf_scores(states[e])).reduce((prv, cur) => prv > cur ? prv : cur, 0)
+  // return directions.map(e => calc_mean_leaf_scores(states[e])).reduce((prv, cur) => prv + cur, 0)
+  return directions.map(e => calc_mean_leaf_scores(states[e])).reduce((prv, cur) => prv > cur ? prv : cur, 0)
 }
 
 function pick_promising (state) {
