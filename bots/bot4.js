@@ -1,24 +1,27 @@
 
-const rules = require('./game');
-const {play, pick_rand, calc_advance, directions} = require('./bot_helpers');
+const rules = require('../lib/game');
+const {play, pick_biased, calc_advance} = require('./bot_helpers');
 
 const server = 'http://localhost:3000';
 
-const sleepTime = 30;
+// we specifically define this order for the bias
+const directions = ['right', 'down', 'left', 'up'];
 
-const turnsInAdvance = 4;
-const name = `Bot: Sort - ${turnsInAdvance}`
+const sleepTime = 10;
+
+const turnsInAdvance = 6;
+const name = `Bot: Sort2 - ${turnsInAdvance}`
 // Strategy: try to sort the tiles into a corner
 
 
 // === logic ===============
-
 function score (state, score) {
+  let sorted = [...state].sort()
   let nFields = state.filter(e => e !== 0).length
   // let sortBonus = state.reduce((prv, cur, i) => prv + i * Math.pow(cur, 1/4), 0);
   let sortBonus = state.reduce((prv, cur, i) => prv + i * cur, 0);
-  // console.log(sortBonus, score, sortBonus / nFields)
-  return sortBonus / nFields + score
+  // console.log(sortBonus, score, sortBonus / (nFields / 2))
+  return sortBonus / (nFields /2)  + score / (4 * turnsInAdvance)
 }
 
 
@@ -27,8 +30,6 @@ function calc_mean_leaf_scores (states) {
     return score(states.newState, states.newScore)
   }
 
-  // TODO: eval different merge strategies
-  // return directions.map(e => calc_mean_leaf_scores(states[e])).reduce((prv, cur) => prv + cur, 0)
   return directions.map(e => calc_mean_leaf_scores(states[e])).reduce((prv, cur) => prv > cur ? prv : cur, 0)
 }
 
@@ -49,7 +50,8 @@ function pick_promising (state) {
       options.push(dir)
     }
   }
-  return pick_rand(options)
+  // console.log('===', options)
+  return pick_biased(options)
 }
 
 

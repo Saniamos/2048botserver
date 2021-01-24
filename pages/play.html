@@ -25,7 +25,7 @@
                 v-on:swiped-left="move('left')"
                 v-on:swiped-right="move('right')"
                 v-on:swiped-up="move('up')">
-                        <div v-for="tile in game.state" class="tile" :class="[tileToClass(tile)]">
+                        <div v-for="(tile, index) in game.state" class="tile" :class="[tileToClass(tile), indexToClass(index)]">
                             <span class="center" v-if="tile > 0">{{tile}}</span>
                         </div>
                         <div v-if="game.finished" class="finished">
@@ -100,6 +100,9 @@
             tileToClass (tile) {
                 return 'tile-' + tile;
             },
+            indexToClass (index) {
+                return 'tile-id-' + index;
+            },
             move (direction) {
                 move(direction);
             }
@@ -148,7 +151,7 @@
         }
     })    
 </script>
-<link rel="stylesheet" href="/overview/game.css"></link>
+<link rel="stylesheet" href="/stylesheets/game.css"></link>
 <style>
 
 
@@ -227,7 +230,7 @@
 
 
 </style>
-<script src="/overview/swipe-events.js"></script>
+<script src="/javascript/swipe-events.js"></script>
 <style>
     
     

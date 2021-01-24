@@ -2,9 +2,17 @@ const express = require('express')
 const ws = require('ws');
 const fs = require('fs');
 const path = require('path');
+const logger = require('morgan');
 
-const rules = require('./game')
-const ObeservableStorage = require('./state');
+
+const app = express()
+const port = 3000
+
+
+app.use(logger('dev'));
+
+const rules = require('./lib/game')
+const ObeservableStorage = require('./lib/state');
 
 let storedGames = []
 const dataStoragePath = './games.json';
@@ -17,9 +25,6 @@ if (fs.existsSync(dataStoragePath)) {
 }
 const games = new ObeservableStorage(storedGames);
 
-
-const app = express()
-const port = 3000
 
 app.listen(port, () => {
   console.log(`Example app listening at http://localhost:${port}`)
@@ -58,7 +63,12 @@ app.get('/game/:id/data', (req, res) => {
 // === Play Sites =================================
 
 app.get('/game/:id', function(req, res) {
-  res.sendFile(path.join(__dirname + '/views/play.html'));
+  res.sendFile(path.join(__dirname + '/pages/play.html'));
+});
+
+
+app.get('/', function(req, res) {
+  res.sendFile(path.join(__dirname + '/pages/overview.html'));
 });
 
 
@@ -125,8 +135,8 @@ wss.on('connection', function connection(socket) {
   wsSend(socket, 'service?')
 });
 
-// maybe not use this as static server?
-app.use('/overview', express.static('public'))
+// TODO: consider using the standard structure 
+app.use('/', express.static(path.join(__dirname, 'public')))
 
 
 

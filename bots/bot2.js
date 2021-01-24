@@ -1,18 +1,19 @@
 
 // imports (no need to change)
+const rules = require('../lib/game');
 const {play, pick_rand, calc_advance, directions} = require('./bot_helpers');
 
 // server adress (no need to change)
 const server = 'http://localhost:3000';
 
 // timout between movements
-const sleepTime = 100;
+const sleepTime = 10;
 
 // number of turns the bot should consider in advance
 // CAUTION: all possible paths are calculated: sum_i 4^n-i, where n the number of turns and i from 0 to n
 // ie 3 turns will need to calc: 4^3 + 4^2 + 4^1 
 // 3-5 is a reasonable number, 10 already takes quite long to calc
-const turnsInAdvance = 3;
+const turnsInAdvance = 8;
 // Name of the bot in the overview
 const name = `Bot: FS - ${turnsInAdvance}`
 
@@ -53,8 +54,10 @@ function calc_mean_leaf_scores (states) {
 function pick_promising (state) {
   let futures = calc_advance({newState: state, newScore: 0}, turnsInAdvance)
   let scores = {}
-  if (!rules.stateUnChanged(state, rules.move_direction(dir, state).newState)) {
-    scores[dir] = calc_mean_leaf_scores(futures[dir])
+  for (let dir of directions) {
+    if (!rules.stateUnChanged(state, rules.move_direction(dir, state).newState)) {
+      scores[dir] = calc_mean_leaf_scores(futures[dir])
+    }
   }
 
   let highest = Math.max.apply(undefined, Object.values(scores))
