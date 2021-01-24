@@ -5,23 +5,41 @@ const {play, pick_biased, calc_advance} = require('./bot_helpers');
 const server = 'http://localhost:3000';
 
 // we specifically define this order for the bias
-const directions = ['right', 'down', 'left', 'up'];
+const directions = ['left', 'up', 'right', 'down'];
 
 const sleepTime = 100;
 
-const turnsInAdvance = 4;
-const name = `Bot: Sort2 - ${turnsInAdvance}`
-// Strategy: try to sort the tiles into a corner
+const turnsInAdvance = 6;
+const name = `Bot: Combo - ${turnsInAdvance}`
+// Strategy: try to sort the tiles into the upper left corner, by scoring based on how close they are to sorted, with the higher tiles being more important
 
+
+function print_board(state) {
+  for (var i = 0; i < 4; i += 1) {
+    console.log(...state.slice(i * 4, i * 4 + 4))
+  }
+}
 
 // === logic ===============
 function score (state, score) {
-  let sorted = [...state].sort()
+  let sorted = [...state].sort((a, b) => b - a)
   let nFields = state.filter(e => e !== 0).length
-  // let sortBonus = state.reduce((prv, cur, i) => prv + i * Math.pow(cur, 1/4), 0);
-  let sortBonus = state.reduce((prv, cur, i) => prv + i * cur, 0);
-  // console.log(sortBonus, score, sortBonus / (nFields / 2))
-  return sortBonus / (nFields /2)  + score / (4 * turnsInAdvance)
+  let mx = Math.max.apply(undefined, state)
+  let comb = true
+  let sortBonus = state.reduce((prv, cur, i) => {
+    comb = comb && cur === sorted[i]
+    if (comb) {
+      return prv + cur
+    }
+    return prv
+  }, 0);
+  let res = sortBonus * score
+
+  // console.log('======')
+  // print_board(state)
+  // console.log('---')
+  // console.log(res, sortBonus, score, nFields)
+  return res
 }
 
 
@@ -29,8 +47,8 @@ function calc_mean_leaf_scores (states) {
   if (states.newState !== undefined) {
     return score(states.newState, states.newScore)
   }
-
-  return directions.map(e => calc_mean_leaf_scores(states[e])).reduce((prv, cur) => prv > cur ? prv : cur, 0)
+  return directions.map(e => calc_mean_leaf_scores(states[e])).reduce((prv, cur) => prv + cur, 0)
+  // return directions.map(e => calc_mean_leaf_scores(states[e])).reduce((prv, cur) => prv > cur ? prv : cur, 0)
 }
 
 function pick_promising (state) {

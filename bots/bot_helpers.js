@@ -1,5 +1,5 @@
 const request = require('request');
-const rules = require('./../lib/game')
+const rules = require('../lib/game')
 
 const directions = ['left', 'up', 'right', 'down'];
 
@@ -50,6 +50,8 @@ async function play(server, name, pick_fn, sleepTime=100) {
 }
 
 // returns nested structure: {left: {left: {newState, newScore}, right: {} ...} ...}
+// TODO: if the state does not change just link to the neighours
+// TODO: consider averaging several computations per choice (to average the random new tile position influcence)
 function calc_advance (state, future = 1) {
   if (future < 1) {
     return state;
