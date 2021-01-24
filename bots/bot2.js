@@ -7,13 +7,13 @@ const {play, pick_rand, calc_advance, directions} = require('./bot_helpers');
 const server = 'http://localhost:3000';
 
 // timout between movements
-const sleepTime = 10;
+const sleepTime = 100;
 
 // number of turns the bot should consider in advance
 // CAUTION: all possible paths are calculated: sum_i 4^n-i, where n the number of turns and i from 0 to n
 // ie 3 turns will need to calc: 4^3 + 4^2 + 4^1 
 // 3-5 is a reasonable number, 10 already takes quite long to calc
-const turnsInAdvance = 8;
+const turnsInAdvance = 4;
 // Name of the bot in the overview
 const name = `Bot: FS - ${turnsInAdvance}`
 

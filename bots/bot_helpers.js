@@ -1,5 +1,5 @@
 const request = require('request');
-const rules = require('./game')
+const rules = require('./../lib/game')
 
 const directions = ['left', 'up', 'right', 'down'];
 

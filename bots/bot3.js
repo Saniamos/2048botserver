@@ -4,9 +4,9 @@ const {play, pick_rand, calc_advance, directions} = require('./bot_helpers');
 
 const server = 'http://localhost:3000';
 
-const sleepTime = 20;
+const sleepTime = 100;
 
-const turnsInAdvance = 6;
+const turnsInAdvance = 4;
 const name = `Bot: Sort - ${turnsInAdvance}`
 // Strategy: try to sort the tiles into a corner
 

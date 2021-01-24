@@ -7,9 +7,9 @@ const server = 'http://localhost:3000';
 // we specifically define this order for the bias
 const directions = ['right', 'down', 'left', 'up'];
 
-const sleepTime = 10;
+const sleepTime = 100;
 
-const turnsInAdvance = 6;
+const turnsInAdvance = 4;
 const name = `Bot: Sort2 - ${turnsInAdvance}`
 // Strategy: try to sort the tiles into a corner
 
