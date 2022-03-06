@@ -68,8 +68,9 @@ function pick_promising (state) {
       options.push(dir)
     }
   }
-  // console.log('===', options)
-  return pick_biased(options)
+
+  let { direction } = pick_biased(options);
+  return {direction, calcs: 4 ** turnsInAdvance}
 }
 
 

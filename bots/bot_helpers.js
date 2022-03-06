@@ -31,22 +31,30 @@ async function start (server, name) {
 
 function pick_rand(arr) {
   // TODO: is this truly equal?
-  return arr[Math.floor(Math.random() * arr.length)];
+  return {direction: arr[Math.floor(Math.random() * arr.length)], calcs: 1};
 }
 
 // picks the first entries with higher prob than the others
 // always halfs probability with each index passed
 function pick_biased (arr) {
-  return arr.filter((_, i) => i + 1 === arr.length || Math.random() < 0.5)[0]
+  return {direction: arr.filter((_, i) => i + 1 === arr.length || Math.random() < 0.5)[0], calcs: 1};
 }
 
 async function play(server, name, pick_fn, sleepTime=100) {
+  var moves = 0;
+  var comps = 0;
+
   var {id, game} = await start(server, name)
   while (game.finished === false) {
-    let direction = pick_fn(game.state);
-    game = await move(server, id, direction)
+    let {direction, calcs} = pick_fn(game.state);
+    game = await move(server, id, direction);
+    moves += 1
+    comps += calcs
     await sleep(sleepTime);
   }
+
+  console.log(`${name} - Score/Calc: ${game.score / comps}, Calc/Move: ${comps / moves} (Score: ${game.score}, Calcs: ${comps}, Moves: ${moves})`)
+  return {moves, comps, game}
 }
 
 // returns nested structure: {left: {left: {newState, newScore}, right: {} ...} ...}

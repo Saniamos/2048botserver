@@ -49,7 +49,9 @@ function pick_promising (state) {
       options.push(dir)
     }
   }
-  return pick_rand(options)
+
+  let { direction } = pick_rand(options);
+  return {direction, calcs: 4 ** turnsInAdvance}
 }
 
 

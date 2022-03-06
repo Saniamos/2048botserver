@@ -13,7 +13,7 @@ const sleepTime = 100;
 // CAUTION: all possible paths are calculated: sum_i 4^n-i, where n the number of turns and i from 0 to n
 // ie 3 turns will need to calc: 4^3 + 4^2 + 4^1 
 // 3-5 is a reasonable number, 10 already takes quite long to calc
-const turnsInAdvance = 4;
+const turnsInAdvance = 3;
 // Name of the bot in the overview
 const name = `Bot: FS - ${turnsInAdvance}`
 
@@ -67,7 +67,9 @@ function pick_promising (state) {
       options.push(dir)
     }
   }
-  return pick_rand(options)
+
+  let { direction } = pick_rand(options);
+  return {direction, calcs: 4 ** turnsInAdvance}
 }
 
 
