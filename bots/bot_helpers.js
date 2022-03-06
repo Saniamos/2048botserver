@@ -1,3 +1,4 @@
+const { json } = require('express/lib/response');
 const request = require('request');
 const rules = require('../lib/game')
 
@@ -62,19 +63,60 @@ async function play(server, name, pick_fn, sleepTime=100) {
 // TODO: consider averaging several computations per choice (to average the random new tile position influcence)
 function calc_advance (state, future = 1) {
   if (future < 1) {
-    return state;
+    return {states: state, comps: 0};
   }
 
   let states = {}
+  let comps = 4
   
   for (let dir of directions) {
     let {newState, newScore} = rules.move(dir, state.newState)
     states[dir] = {newScore: newScore + state.newScore, newState}
     if (future > 1) {
-      states[dir] = calc_advance(states[dir], future - 1)
+      let rec = calc_advance(states[dir], future - 1)
+      states[dir] = rec.states
+      comps += rec.comps
     }
   }
-  return states
+  return {states: states, comps: comps}
+}
+
+function state_to_index(state){
+  return JSON.stringify(state) // TODO: hash instead
+}
+
+function calc_advance_cache(state, future = 1, cache={}) {
+  if (future < 1) {
+    return {states: state, comps: 0};
+  }
+
+  let states = {}
+  let comps = 0
+  
+  for (let dir of directions) {
+    let move_ret;
+
+    state_str = state_to_index(state.newState)
+
+    if (cache[state_str] !== undefined && cache[state_str][dir] !== undefined) {
+      // Important: this only holds if the score is purely based on the numbers that are combined, no combos etc
+      move_ret = cache[state_str][dir]
+    } else {
+      move_ret = rules.move(dir, state.newState)
+      comps += 1
+    }
+
+    let {newState, newScore} = move_ret
+    states[dir] = {newScore: newScore + state.newScore, newState}
+    cache[state_str] = {...cache[state_str], [dir]: states[dir]}
+
+    if (future > 1) {
+      let rec = calc_advance_cache(states[dir], future - 1, cache)
+      states[dir] = rec.states
+      comps += rec.comps
+    }
+  }
+  return {states: states, comps: comps}
 }
 
 module.exports = {
@@ -86,5 +128,6 @@ module.exports = {
   pick_rand: pick_rand,
   pick_biased: pick_biased,
   calc_advance: calc_advance,
+  calc_advance_cache: calc_advance_cache,
   directions: directions
 }

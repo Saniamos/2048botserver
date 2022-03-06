@@ -52,11 +52,11 @@ function calc_mean_leaf_scores (states) {
 // then picks the best scored one
 // if two strategies have the same score, pick random (could be changed to favor a certain direction (ie chose left over right in 90% of cases or similar))
 function pick_promising (state) {
-  let futures = calc_advance({newState: state, newScore: 0}, turnsInAdvance)
+  let states, comps = calc_advance({newState: state, newScore: 0}, turnsInAdvance)
   let scores = {}
   for (let dir of directions) {
     if (!rules.stateUnChanged(state, rules.move_direction(dir, state).newState)) {
-      scores[dir] = calc_mean_leaf_scores(futures[dir])
+      scores[dir] = calc_mean_leaf_scores(states[dir])
     }
   }
 
@@ -69,7 +69,7 @@ function pick_promising (state) {
   }
 
   let { direction } = pick_rand(options);
-  return {direction, calcs: 4 ** turnsInAdvance}
+  return {direction, calcs: comps}
 }
 
 

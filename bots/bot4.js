@@ -1,6 +1,6 @@
 
 const rules = require('../lib/game');
-const {play, pick_biased, calc_advance} = require('./bot_helpers');
+const {play, pick_biased, calc_advance, calc_advance_cache} = require('./bot_helpers');
 
 const server = 'http://localhost:3000';
 
@@ -9,7 +9,7 @@ const directions = ['left', 'up', 'right', 'down'];
 
 const sleepTime = 100;
 
-const turnsInAdvance = 6;
+const turnsInAdvance = 4;
 const name = `Bot: Combo - ${turnsInAdvance}`
 // Strategy: try to sort the tiles into the upper left corner, by scoring based on how close they are to sorted, with the higher tiles being more important
 
@@ -52,12 +52,13 @@ function calc_mean_leaf_scores (states) {
 }
 
 function pick_promising (state) {
-  let futures = calc_advance({newState: state, newScore: 0}, turnsInAdvance)
+  let {states, comps} = calc_advance_cache({newState: state, newScore: 0}, turnsInAdvance)
+  // let {states, comps} = calc_advance({newState: state, newScore: 0}, turnsInAdvance)
   let scores = {}
   for (let dir of directions) {
     // TODO: find more elegant version to filter this
     if (!rules.stateUnChanged(state, rules.move_direction(dir, state).newState)) {
-      scores[dir] = calc_mean_leaf_scores(futures[dir])
+      scores[dir] = calc_mean_leaf_scores(states[dir])
     }
   }
 
@@ -70,7 +71,7 @@ function pick_promising (state) {
   }
 
   let { direction } = pick_biased(options);
-  return {direction, calcs: 4 ** turnsInAdvance}
+  return {direction, calcs: comps}
 }
 
 

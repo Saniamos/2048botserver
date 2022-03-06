@@ -33,12 +33,12 @@ function calc_mean_leaf_scores (states) {
 }
 
 function pick_promising (state) {
-  let futures = calc_advance({newState: state, newScore: 0}, turnsInAdvance)
+  let states, comps = calc_advance({newState: state, newScore: 0}, turnsInAdvance)
   let scores = {}
   for (let dir of directions) {
     // TODO: find more elegant version to filter this
     if (!rules.stateUnChanged(state, rules.move_direction(dir, state).newState)) {
-      scores[dir] = calc_mean_leaf_scores(futures[dir])
+      scores[dir] = calc_mean_leaf_scores(states[dir])
     }
   }
 
@@ -51,7 +51,7 @@ function pick_promising (state) {
   }
 
   let { direction } = pick_rand(options);
-  return {direction, calcs: 4 ** turnsInAdvance}
+  return {direction, calcs: comps}
 }
 
 
