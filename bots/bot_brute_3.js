@@ -21,10 +21,10 @@ function print_board(state) {
 }
 
 // === logic ===============
-function score (state, score) {
+function sort_bonus(state) {
   let sorted = [...state].sort((a, b) => b - a)
-  let nFields = state.filter(e => e !== 0).length
-  let mx = Math.max.apply(undefined, state)
+  // let nFields = state.filter(e => e !== 0).length
+  // let mx = Math.max.apply(undefined, state)
   let comb = true
   let sortBonus = state.reduce((prv, cur, i) => {
     comb = comb && cur === sorted[i]
@@ -33,13 +33,15 @@ function score (state, score) {
     }
     return prv
   }, 0);
-  let res = sortBonus * score
+  return sortBonus
+}
 
-  // console.log('======')
-  // print_board(state)
-  // console.log('---')
-  // console.log(res, sortBonus, score, nFields)
-  return res
+function score_position(state) {
+  return 100 * sort_bonus(state) / state.reduce((prv, cur) => prv + cur, 0)
+}
+
+function score (state, score) {
+  return sort_bonus(state) + score
 }
 
 
@@ -52,7 +54,7 @@ function calc_mean_leaf_scores (states) {
 }
 
 function pick_promising (state) {
-  let {states, comps} = calc_advance_cache({newState: state, newScore: 0}, turnsInAdvance)
+  let {states, comps} = calc_advance_cache({newState: state, newScore: 0}, turnsInAdvance, score_position)
   // let {states, comps} = calc_advance({newState: state, newScore: 0}, turnsInAdvance)
   let scores = {}
   for (let dir of directions) {

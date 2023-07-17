@@ -85,7 +85,13 @@ function state_to_index(state){
   return JSON.stringify(state) // TODO: hash instead
 }
 
-function calc_advance_cache(state, future = 1, cache={}) {
+function simple_board_score(state) {
+  return 5
+}
+
+// Position score in percent, that this is a sucessfull position, ie 0: the gam is over 100: we should defenitely continue here
+// everything below 5 percent is not further investigated
+function calc_advance_cache(state, future = 1, position_scorer=simple_board_score, cache={}) {
   if (future < 1) {
     return {states: state, comps: 0};
   }
@@ -107,11 +113,11 @@ function calc_advance_cache(state, future = 1, cache={}) {
     }
 
     let {newState, newScore} = move_ret
-    states[dir] = {newScore: newScore + state.newScore, newState}
+    states[dir] = {newScore: newScore + state.newScore, newState, position: position_scorer(newState)}
     cache[state_str] = {...cache[state_str], [dir]: states[dir]}
 
-    if (future > 1) {
-      let rec = calc_advance_cache(states[dir], future - 1, cache)
+    if (future > 1 && states[dir].position > 5) {
+      let rec = calc_advance_cache(states[dir], future - 1, position_scorer, cache)
       states[dir] = rec.states
       comps += rec.comps
     }

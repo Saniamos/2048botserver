@@ -12,7 +12,6 @@ const name = `Bot: Sort - ${turnsInAdvance}`
 
 
 // === logic ===============
-
 function score (state, score) {
   let nFields = state.filter(e => e !== 0).length
   // let sortBonus = state.reduce((prv, cur, i) => prv + i * Math.pow(cur, 1/4), 0);
